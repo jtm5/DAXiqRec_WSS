@@ -69,7 +69,8 @@ np.save("Flex.npy", myrecording)
 # OK, assume we have recorded from Flex, input the .NPY file
 #myrecording = np.load("Flex.npy")
 
-#myrecLen = len(myrecording)
+myrecLen = len(myrecording)
+print("myreclen = ", myrecLen)
 sqrt1000 = math.sqrt(1000.0)
 
 complexSamps = np.zeros( len(myrecording), dtype=np.complex64)  
@@ -231,13 +232,13 @@ plt.show()
 
 
 # Now create the array of PSDs
-psdArray = np.zeros( (300 ,1024), dtype=np.float32)
+psdArray = np.zeros( ( int(myrecLen/1024) ,1024), dtype=np.float32)
 # do a quick PSD just to get the f array to fill first row of PSD array -- for .CSV plotting (& later wf?)
 #       NOTE: the PSD output has f bins 0 to +fs/2 in array[0:511]; -fs/2 to 0 is in array[512:1023]
 #           Need to rearrange to -f/2 to +fs/2 for waterfall
 f, Pxx_den = scipy.signal.welch(complexSamps[0:1024], fs, nperseg = 2048, scaling="density") 
 psdArray[0] = f
-for i in range(1,300,1):
+for i in range(1,int(myrecLen/1024),1):
     f, Pxx_den = scipy.signal.welch(complexSamps[1024 * i  : 1024 * (i+1)], fs, nperseg = 2048, scaling="density")
     psdArray[i] = 10.0 * np.log10(Pxx_den)
     psdArray[i] = np.roll(psdArray[i], 512) # rolls the array to the right
