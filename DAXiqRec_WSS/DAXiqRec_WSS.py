@@ -38,6 +38,7 @@ from tkinter.font import NORMAL
 #from types import DynamicClassAttribute
 import matplotlib.pyplot as plt
 from matplotlib.pyplot import figure
+import matplotlib.animation as animation
 import sounddevice as sd
 import numpy as np  # Make sure NumPy is loaded before it is used in the callback
 assert np  # avoid "imported but unused" message (W0611)
@@ -60,10 +61,10 @@ sd.default.device = (47, 17)  # 47 is DAX I/Q 1 and 48??? is DAX 1
 devs = sd.default.device
 
 # Do the recording
-#myrecording = sd.rec(int(duration*fs), samplerate=fs, channels=2)
-#sd.wait()
-##myrecording = myrecording / math.sqrt(1000)
-#np.save("Flex.npy", myrecording)
+myrecording = sd.rec(int(duration*fs), samplerate=fs, channels=2)
+sd.wait()
+#myrecording = myrecording / math.sqrt(1000)
+np.save("Flex.npy", myrecording)
 
 
 # OK, assume we have recorded from Flex, input the .NPY file
@@ -189,15 +190,15 @@ f, Pxx_den = scipy.signal.welch(complexSamps[0:1024], fs, nperseg = 2048, scalin
 #f, Pxx_den = scipy.signal.welch(complexSamps, fs, nperseg = len(myrecording)/2, scaling="density")
 
 log_Pxx_den = 10 * np.log10( Pxx_den)
-#plt.figure()
-##plt.semilogy(f, Pxx_den)
-#plt.plot(f, log_Pxx_den )
-##plt.xlim([0,100])
-#plt.xlabel('frequency [Hz]')
-#plt.ylabel('Power Spectral Density [V**/hz')
-#plt.title('Power Spectral Density (scipy.signal.welch)')
-#plt.grid(color='green', linestyle='--')
-##plt.show()
+plt.figure()
+#plt.semilogy(f, Pxx_den)
+plt.plot(f, log_Pxx_den )
+#plt.xlim([0,100])
+plt.xlabel('frequency [Hz]')
+plt.ylabel('Power Spectral Density [V**/hz')
+plt.title('Power Spectral Density (scipy.signal.welch)')
+plt.grid(color='green', linestyle='--')
+plt.show()
 
 
 
@@ -243,9 +244,61 @@ psdArray[0] = f
 for i in range(1,int(myrecLen/1024),1):
     f, Pxx_den = scipy.signal.welch(complexSamps[1024 * i  : 1024 * (i+1)], fs, nperseg = 2048, scaling="density")
     psdArray[i] = 10.0 * np.log10(Pxx_den)
-    psdArray[i] = np.roll(psdArray[i], 512) # rolls the array to the right
+    #*****************************************************************************************************************
+    #psdArray[i] = np.roll(psdArray[i], 512) # rolls the array to the right  # WHY???????? only if being used by wf4.py
+    #*****************************************************************************************************************
 
 saveFile = "D:\\Visual Studio SOURCE\\DSP Experiments\\psd_array.csv"
 np.savetxt(saveFile, psdArray, delimiter=",")
 
 np.save("D:\\Visual Studio SOURCE\\DSP Experiments\\psd_array.npy", psdArray)
+
+# EXPERIMENT for animating a PSD display
+
+# FIRST -- try plotting a couple of PSDs from psdArray[]
+
+plt.figure()
+#plt.semilogy(f, Pxx_den)
+pDen=psdArray[200]
+plt.plot(f, pDen )
+#plt.xlim([0,100])
+plt.xlabel('frequency [Hz]')
+plt.ylabel('Power Spectral Density [V**/hz')
+plt.title('Power Spectral Density (scipy.signal.welch)')
+plt.grid(color='green', linestyle='--')
+plt.show()
+
+
+#OK, try a short animation
+
+
+fig, ax = plt.subplots()
+
+#x = np.arange(0, 2*np.pi, 0.01)
+f, Pxx_den = scipy.signal.welch(complexSamps[0:1024], fs, nperseg = 2048, scaling="density") 
+x = f
+#line, = ax.plot(x, np.sin(x))
+line, = ax.plot(x, 10.0 * np.log10(Pxx_den))
+
+def animate(i):
+ 
+    line.set_ydata(psdArray[i])  # update the data.
+    i += 1
+
+    return line,
+
+
+ani = animation.FuncAnimation(
+    fig, animate, interval=50, blit=True, save_count=50)
+
+# To save the animation, use e.g.
+#
+# ani.save("movie.mp4")
+#
+# or
+#
+# writer = animation.FFMpegWriter(
+#     fps=15, metadata=dict(artist='Me'), bitrate=1800)
+# ani.save("movie.mp4", writer=writer)
+
+plt.show()
