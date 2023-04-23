@@ -60,14 +60,15 @@ sd.default.device = (47, 17)  # 47 is DAX I/Q 1 and 48??? is DAX 1
 devs = sd.default.device
 
 # Do the recording
-myrecording = sd.rec(int(duration*fs), samplerate=fs, channels=2)
-sd.wait()
-#myrecording = myrecording / math.sqrt(1000)
-np.save("Flex.npy", myrecording)
+#myrecording = sd.rec(int(duration*fs), samplerate=fs, channels=2)
+#sd.wait()
+##myrecording = myrecording / math.sqrt(1000)
+#np.save("Flex.npy", myrecording)
 
 
 # OK, assume we have recorded from Flex, input the .NPY file
-#myrecording = np.load("Flex.npy")
+myrecording = np.load("Flex.npy")
+
 
 myrecLen = len(myrecording)
 print("myreclen = ", myrecLen)
@@ -118,6 +119,7 @@ plt.figure(figsize=(15, 10))
 plt.xticks(np.arange(-fs/2, fs/2, 2000))
 # plt.xticks(f)
 # plt.yscale("log")
+
 plt.plot(f, dbm)     #fft_samp_abs)
 plt.show()
 
