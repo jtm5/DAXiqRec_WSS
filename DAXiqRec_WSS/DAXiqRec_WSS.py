@@ -33,6 +33,7 @@
 #########################################################################################################################
 
 from cmath import sqrt
+import signal
 import time
 from tkinter.font import NORMAL
 #from types import DynamicClassAttribute
@@ -61,14 +62,17 @@ sd.default.device = (47, 17)  # 47 is DAX I/Q 1 and 48??? is DAX 1
 devs = sd.default.device
 
 # Do the recording
-myrecording = sd.rec(int(duration*fs), samplerate=fs, channels=2)
-sd.wait()
-#myrecording = myrecording / math.sqrt(1000)
-np.save("Flex.npy", myrecording)
+#myrecording = sd.rec(int(duration*fs), samplerate=fs, channels=2)
+#sd.wait()
+##myrecording = myrecording / math.sqrt(1000)  # if commented out, no scaling
+#np.save("Flex.npy", myrecording)
 
 
 # OK, assume we have recorded from Flex, input the .NPY file
 myrecording = np.load("Flex.npy")
+
+#sd.play(myrecording)
+#sd.wait()
 
 
 myrecLen = len(myrecording)
@@ -90,8 +94,8 @@ for i in range(0, len(myrecording), 1):
     complexSamps.imag[i] = myrecording[i,1] #/ sqrt1000
 
 
-#saveFile = "D:\\Visual Studio SOURCE\\DSP Experiments\\complexArray.csv"
-#np.savetxt(saveFile, complexSamps, delimiter=",")
+saveFile = "D:\\Visual Studio SOURCE\\DSP Experiments\\complexArray.csv"
+np.savetxt(saveFile, complexSamps, delimiter=",")
 
 #pad = np.zeros( (1024), dtype=np.complex64)
 sample = np.zeros( (1024), dtype=np.complex64)
@@ -125,39 +129,44 @@ plt.plot(f, dbm)     #fft_samp_abs)
 plt.show()
 
 # two zero padding arrays
-zerosSegSize = np.zeros( (segSize), dtype=np.complex128)
-zerosSegSizePlus1 = np.zeros( (segSize - 1), dtype=np.complex128)
-bpFilter = np.zeros( (filterSize), dtype=np.complex128)
+zerosSegSize = np.zeros( (segSize), dtype=np.complex64)
+zerosSegSizeMinus1 = np.zeros( (segSize - 1), dtype=np.complex64)
+bpFilter = np.zeros( (filterSize), dtype=np.complex64)
 
-for m in range(2, 50, 1):                  #<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+for m in range(0, 512, 1):                  #<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
                                                  # NOTE: unless bpfilter is all 1s, the output is < 256 long!!!!
-     bpFilter[m] = 1+0j
+     bpFilter[m] = .5+0j
 
+window = scipy.signal.bpFilter      # FIRST try on 2jul23 to window the filter
+bpFilter = bpFilter * window            # really need to design the filter properly to start with
 
 
 # Get the first chunk to be processed loaded intp tempOut
 recChunk = complexSamps[0: segSize]
 
 recChunkPad = np.append(recChunk, zerosSegSize)
-bpFilterPad = np.append(bpFilter, zerosSegSizePlus1)
+bpFilterPad = np.append(bpFilter, zerosSegSizeMinus1)
 recFFT = np.fft.fft(recChunkPad, FFTN)
 outFFT = recFFT * bpFilterPad
 
 audioList = []
 
 # Experiment - try just loading each processed junk into a big array
-outRegister = np.zeros(96000, dtype=np.float64)
+outRegister = np.zeros(96000, dtype=np.float32)
 
 for inc in range(0, 170, 1):  # max was 765 WHICH WAS TOTALLT STUPID!!!
     recChunk = complexSamps[inc * segSize: (inc + 1) * segSize]
     recChunkPad = np.append(recChunk, zerosSegSize)
 
-    bpFilterPad = np.append(bpFilter, zerosSegSizePlus1)
+    bpFilterPad = np.append(bpFilter, zerosSegSizeMinus1)
     recFFT = np.fft.fft(recChunkPad, FFTN)
     outFFT = recFFT * bpFilterPad
 
     outAudio = np.fft.ifft(outFFT, FFTN)
     outAudioReal = outAudio.real  * 20     #gain setting
+
+    saveFile = "D:\\Visual Studio SOURCE\\DSP Experiments\\outAudioReal.csv"
+    np.savetxt(saveFile, outAudioReal, delimiter=",")
     
     
     # WATCH OUT FOR SETTING A np.array equal to another it is <<<NOT>> a unique array
@@ -169,36 +178,36 @@ for inc in range(0, 170, 1):  # max was 765 WHICH WAS TOTALLT STUPID!!!
             outRegister[i] += outAudioReal[i]
     else:
         for k in range(0, FFTN, 1):
-            outRegister[(inc * 512) + k] += outAudioReal[k]
+            outRegister[(inc * 514) + k] += outAudioReal[k]
 
 
-#sd.play(outRegister)
-#sd.wait()
-
-#sd.play(outRegister)
-#sd.wait()
+sd.play(outRegister)
+sd.wait()
 
 #sd.play(outRegister)
 #sd.wait()
 
-#plt.title("outRegister")
-#plt.plot(outRegister[:5000])
-#plt.show()
+#sd.play(outRegister)
+#sd.wait()
+
+plt.title("outRegister")
+plt.plot(outRegister[:5000])
+plt.show()
 
 
 f, Pxx_den = scipy.signal.welch(complexSamps[0:1024], fs, nperseg = 2048, scaling="density")
 #f, Pxx_den = scipy.signal.welch(complexSamps, fs, nperseg = len(myrecording)/2, scaling="density")
 
 log_Pxx_den = 10 * np.log10( Pxx_den)
-plt.figure()
-#plt.semilogy(f, Pxx_den)
-plt.plot(f, log_Pxx_den )
-#plt.xlim([0,100])
-plt.xlabel('frequency [Hz]')
-plt.ylabel('Power Spectral Density [V**/hz')
-plt.title('Power Spectral Density (scipy.signal.welch)')
-plt.grid(color='green', linestyle='--')
-plt.show()
+#plt.figure()
+##plt.semilogy(f, Pxx_den)
+#plt.plot(f, log_Pxx_den )
+##plt.xlim([0,100])
+#plt.xlabel('frequency [Hz]')
+#plt.ylabel('Power Spectral Density [V**/hz')
+#plt.title('Power Spectral Density (scipy.signal.welch)')
+#plt.grid(color='green', linestyle='--')
+#plt.show()
 
 
 
@@ -257,16 +266,16 @@ np.save("D:\\Visual Studio SOURCE\\DSP Experiments\\psd_array.npy", psdArray)
 
 # FIRST -- try plotting a couple of PSDs from psdArray[]
 
-plt.figure()
-#plt.semilogy(f, Pxx_den)
-pDen=psdArray[200]
-plt.plot(f, pDen )
-#plt.xlim([0,100])
-plt.xlabel('frequency [Hz]')
-plt.ylabel('Power Spectral Density [V**/hz')
-plt.title('Power Spectral Density (scipy.signal.welch)')
-plt.grid(color='green', linestyle='--')
-plt.show()
+#plt.figure()
+##plt.semilogy(f, Pxx_den)
+#pDen=psdArray[200]
+#plt.plot(f, pDen )
+##plt.xlim([0,100])
+#plt.xlabel('frequency [Hz]')
+#plt.ylabel('Power Spectral Density [V**/hz')
+#plt.title('Power Spectral Density (scipy.signal.welch)')
+#plt.grid(color='green', linestyle='--')
+#plt.show()
 
 
 #OK, try a short animation
@@ -284,7 +293,8 @@ def animate(i):
  
     line.set_ydata(psdArray[i])  # update the data.
     i += 1
-
+    if (i > 374):
+        ani.event_source.stop()
     return line,
 
 
@@ -301,4 +311,7 @@ ani = animation.FuncAnimation(
 #     fps=15, metadata=dict(artist='Me'), bitrate=1800)
 # ani.save("movie.mp4", writer=writer)
 
+
 plt.show()
+
+
