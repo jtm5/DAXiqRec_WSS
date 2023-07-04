@@ -27,9 +27,9 @@ sig3 = sig1 + sig2 + noise
 #plt.show()
 
 plt.plot(sig3[:100])
-plt.show()
+#plt.show()
 
-fftSig3 = np.fft.fft( sig3[10000:10000+1024])
+fftSig3 = np.fft.fft( sig3[:1024])
 fft_samp_abs = np.abs(fftSig3)
 normalized = fft_samp_abs / 1024
 
@@ -39,8 +39,8 @@ db = 10 * np.log10(power )
 dbm = db + 30.0
 f = np.fft.fftfreq(1024, 1 / sampleRate)
 
-plt.figure(figsize=(15, 10))
-plt.xticks(np.arange(-sampleRate/2, sampleRate/2, 2000))
+#plt.figure(figsize=(15, 10))
+#plt.xticks(np.arange(-sampleRate/2, sampleRate/2, 2000))
 # plt.xticks(f)
 # plt.yscale("log")
 
@@ -72,37 +72,58 @@ f = np.fft.fftfreq(1024, 1 / sampleRate)
 
 np.savetxt("fft.csv", dbm, delimiter=',')
 
-plt.figure(figsize=(15, 10))
-plt.xticks(np.arange(-sampleRate/2, sampleRate/2, 2000))
-# plt.xticks(f)
+#plt.figure(figsize=(15, 10))
+#plt.xticks(np.arange(-sampleRate/2, sampleRate/2, 2000))
+## plt.xticks(f)
 # plt.yscale("log")
 
-#plt.plot(f, dbm)     #fft_samp_abs)
-#plt.show()
-
-# OK, now do an IFFT and see how the sig looks in time domain
-
-sigFiltered = np.fft.ifft(normalized)
-abs_sigFiltered = np.absolute(sigFiltered)
-plt.plot(abs_sigFiltered[:100])
+plt.plot(f, dbm)     #fft_samp_abs)
 plt.show()
 
-# just try to calculate 5 ffts, filter, and then put iffts into array for later processing
+# Overlap add code experiment starts here:
 
-outputArray = np.empty( [ 5 , 1024], dtype=np.complex64)
+# Trying defining signal chunks as 600 samples
+#   Filter size will be 425 bins
+#       So, need to pad sig chunk with 424 zero
+#       And, pad filter with 599 zeros
+
+chunkSize = 600
+filterSize = 425
+chunk = np.zeros( [1024], dtype=np.complex64)
+bpFilter = np.zeros( [1024], dtype=np.complex64)
+
+# make the filter about 60db attenuation
+#  Note:  this filter is pur brick wall - need to improve
+#       by doing a real filter design and/or windowing
+
+
+
+for inc in range(0, 425, 1):    # making full band pass for now
+    bpFilter[inc] = 1 + 0j
+
+#for inc in range(50, 200, 1):    
+#    bpFilter[inc] = 1 + 0j
+
+bpFilterFFT = np.fft.fft(bpFilter) / 1024
+
+# array to hold the iFFT outputs
+outPut = np.zeros( [40000], dtype=np.complex64)
+
+# First, try processing 5 chunks to see how it works
 for i in range(0, 5, 1):
-    fftSig3 = np.fft.fft( sig3[ i * 1024 : (i * 1024) + 1024])
-    normalized = fftSig3 / 1024
-    filteredFFT = fftSig3 * bpFilter
-    plt.plot(np.absolute(filteredFFT))
+    chunk[:600] = sig3[ i * 600 : (i * 600) + 600]
+    chunkFFt = np.fft.fft(chunk) / 1024
+    plt.plot(np.absolute(chunkFFt))
     plt.show()
-    outChunk = np.fft.ifft(filteredFFT)
-    plt.plot(np.imag(outChunk[:200]))
+    filteredChunk = chunkFFt * bpFilterFFT
+    plt.plot(np.absolute(filteredChunk))
     plt.show()
+    chunkOut = np.fft.ifft(filteredChunk)
 
-    outputArray[i, :1024] = outChunk[:1024]
+    outPut[i * 600 : (i * 600) +1024] = chunkOut[:1024]
 
-
+plt.plot(np.real(outPut[:5000]))
+plt.show()
 
 
 dummy = 0
