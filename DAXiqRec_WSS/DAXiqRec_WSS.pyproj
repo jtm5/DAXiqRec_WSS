@@ -22,6 +22,7 @@
   <ItemGroup>
     <Compile Include="convolve.py" />
     <Compile Include="DAXiqRec_WSS.py" />
+    <Compile Include="fftConvole.py" />
     <Compile Include="overlapadd.py" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />
