@@ -4,7 +4,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>719631b2-4a68-4cc7-a870-3a2be67ec45b</ProjectGuid>
     <ProjectHome>.</ProjectHome>
-    <StartupFile>DAXiqRec_WSS.py</StartupFile>
+    <StartupFile>overlapadd.py</StartupFile>
     <SearchPath>C:\Users\tmcma\AppData\Local\Programs\Python\Python39\Lib\site-packages</SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
     <OutputPath>.</OutputPath>
@@ -20,7 +20,9 @@
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="convolve.py" />
     <Compile Include="DAXiqRec_WSS.py" />
+    <Compile Include="overlapadd.py" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />
   <!-- Uncomment the CoreCompile target to enable the Build command in

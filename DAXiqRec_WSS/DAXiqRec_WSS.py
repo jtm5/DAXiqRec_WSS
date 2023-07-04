@@ -18,7 +18,7 @@
 
 ###########################################################################################################################
 # 12 Oct 2022:
-#       Quite an improvement. Sticking with really small (N=256) FFTs. Cleaned up the Overlap Add logic and
+#       Quite an improvement. Cleaned up the Overlap Add logic and
 #       changed output to a 96000 array of samples.
 #       Voice on AM and CHU tones are now pretty intelligble. There is some distortion and an overriding high
 #       high-pitched hum.
@@ -51,8 +51,8 @@ import scipy.signal
 fs = 48000  # sample rate
 # N = 2048  # number of samples in each FFT
 duration = 8    # this sets recording duration in seconds
-segSize = 512#128
-filterSize = 513#129
+segSize = 600 #512#128
+filterSize = 425 #513#129
 FFTN = segSize + filterSize - 1
 
 
@@ -133,12 +133,11 @@ zerosSegSize = np.zeros( (segSize), dtype=np.complex64)
 zerosSegSizeMinus1 = np.zeros( (segSize - 1), dtype=np.complex64)
 bpFilter = np.zeros( (filterSize), dtype=np.complex64)
 
-for m in range(0, 512, 1):                  #<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+for m in range(0, filterSize, 1):                  #<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
                                                  # NOTE: unless bpfilter is all 1s, the output is < 256 long!!!!
-     bpFilter[m] = .5+0j
+     bpFilter[m] = 1.0 + 0j
 
-window = scipy.signal.bpFilter      # FIRST try on 2jul23 to window the filter
-bpFilter = bpFilter * window            # really need to design the filter properly to start with
+
 
 
 # Get the first chunk to be processed loaded intp tempOut
@@ -240,7 +239,7 @@ axs[1].set_title("Power SpectralDensity")
 axs[1].set_xlabel('frequency [Hz]')
 axs[1].set_ylabel('Power Spectral Density [V**/hz')
 axs[1].grid(color='red', linestyle='--')
-plt.show()
+#plt.show()
 
 
 # Now create the array of PSDs
@@ -312,6 +311,6 @@ ani = animation.FuncAnimation(
 # ani.save("movie.mp4", writer=writer)
 
 
-plt.show()
+#plt.show()
 
 
