@@ -13,21 +13,40 @@ f1 = 1000
 f2 = 3000
 sampleRate = 10000
 captureTime = 4
-t = np.arange(0, captureTime, 1 /sampleRate)
-sig1 = np.sin(t * f1 * 6.2830)
-sig2 = np.sin(t * f2 * 6.2830)
+#t = np.arange(0, captureTime, 1 /sampleRate)
+#sig1 = np.sin(t * f1 * 6.2830)
+#sig2 = np.sin(t * f2 * 6.2830)
 
-noise = .1 * random.rand(captureTime * sampleRate)
+def generateTone(fs, toneFreq, numSamples, amplitude):
+    #Generates a sinusoidal signal with the specified
+    #frequency and amplitude
+    
+    step = (float(toneFreq) / float(fs)) * 2.0 * np.pi
+    
+    phaseArray = np.array(range(0,numSamples)) * step
+    
+    #Euler's Formular: e^(j*theta) = cos(theta) + j * sin(theta)
+    #For a complex sinusoidal theta = 2*pi*f*t where each time step is 1/fs    
+    wave = np.exp(1.0j * phaseArray) * amplitude
+    
+    return wave
+
+if __name__ == '__main__':
+    sig1 = generateTone(10000, 1000, 40000, 2)
+    sig2 = generateTone(10000, 3000, 40000, 1)
+    sig3 =sig1 #+sig2
+
+noise = .8 * random.rand(captureTime * sampleRate)
 
 
-sig3 = sig1 + sig2 + noise
+#sig3 = sig3 + noise
 
-#plt.plot(sig1[:100])
-#plt.plot(sig2[:100])
-#plt.show()
+plt.plot(sig1[:100])
+plt.plot(sig2[:100])
+plt.show()
 
 plt.plot(sig3[:100])
-#plt.show()
+plt.show()
 
 fftSig3 = np.fft.fft( sig3[:1024])
 fft_samp_abs = np.abs(fftSig3)
@@ -41,8 +60,8 @@ f = np.fft.fftfreq(1024, 1 / sampleRate)
 
 #plt.figure(figsize=(15, 10))
 #plt.xticks(np.arange(-sampleRate/2, sampleRate/2, 2000))
-# plt.xticks(f)
-# plt.yscale("log")
+#plt.xticks(f)
+#plt.yscale("log")
 
 #plt.plot(f, dbm)     #fft_samp_abs)
 #plt.show()
@@ -98,7 +117,7 @@ bpFilter = np.zeros( [1024], dtype=np.complex64)
 
 
 
-for inc in range(0, 425, 1):    # making full band pass for now
+for inc in range(4, 12, 1):    # making full band pass for now
     bpFilter[inc] = 1 + 0j
 
 #for inc in range(50, 200, 1):    
