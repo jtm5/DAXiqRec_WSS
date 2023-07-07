@@ -20,7 +20,11 @@ def generateTone(fs, toneFreq, numSamples, amplitude):
     return wave
 
 if __name__ == '__main__':
-    sig1 = generateTone(10000, 1000, 40000, 2)
+    sig1 = generateTone(10000, 2000, 40000, 2)
+    plt.plot(np.real(sig1[0:100]))
+    plt.show()
+    plt.plot(np.imag(sig1[0:100]))
+    plt.show()
     sig2 = generateTone(10000, 3000, 40000, 1)
     sig3 =sig1 +sig2
 
