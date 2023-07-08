@@ -72,13 +72,13 @@ bpFilter = np.zeros( [1024], dtype=np.complex64)
 #  Note:  this filter is pur brick wall - need to improve
 #       by doing a real filter design and/or windowing
 
-for inc in range(0, 1024, 1):
-    bpFilter[inc] = .001 + 0j
+#for inc in range(0, 1024, 1):
+#    bpFilter[inc] = .001 + 0j
 
-for inc in range(50, 200, 1):
-    bpFilter[inc] = 1 + 0j
+#for inc in range(50, 200, 1):
+#    bpFilter[inc] = 1 + 0j
 
-filteredSig3 = fftSig3 * bpFilter
+#filteredSig3 = fftSig3 * bpFilter
 
 #fft_samp_abs = np.abs(filteredSig3)
 #normalized = fft_samp_abs / 1024
@@ -98,6 +98,40 @@ filteredSig3 = fftSig3 * bpFilter
 
 #plt.plot(f, dbm)     #fft_samp_abs)
 #plt.show()
+
+## 8jul23 test of designing a windowed-sinc LP filter - see window_sinc.py part of this solution
+#TCalculate a windowed-sinc lp filter     8jul23
+#       this is from https://tomroelandts.com/articles/how-to-create-a-simple-low-pass-filter
+
+# NOTE: below, I picked b to give me a 425 tap filter to match what had done before in original overlapadd.py
+fc = 0.2  # Cutoff frequency as a fraction of the sampling rate (in (0, 0.5)).
+b = 0.0094  # Transition band, as a fraction of the sampling rate (in (0, 0.5)).
+N = int(np.ceil((4 / b)))
+if not N % 2: N += 1  # Make sure that N is odd.
+n = np.arange(N)
+ 
+# Compute sinc filter.
+h = np.sinc(2 * fc * (n - (N - 1) / 2))
+ 
+# Compute Blackman window.
+w = 0.42 - 0.5 * np.cos(2 * np.pi * n / (N - 1)) + \
+    0.08 * np.cos(4 * np.pi * n / (N - 1))
+ 
+# Multiply sinc filter by window.
+h = h * w
+ 
+# Normalize to get unity gain.
+h = h / np.sum(h)
+plt.plot(h)
+plt.show()
+h_FFT = np.fft.fft(h,1024)
+plt.semilogy(np.absolute(h_FFT))
+plt.show()
+
+filteredSig3 = fftSig3 * h_FFT
+plt.plot(filteredSig3)
+plt.show()
+
 
 ###############################################################################################################
 ###############################################################################################################
