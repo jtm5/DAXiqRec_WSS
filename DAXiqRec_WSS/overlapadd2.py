@@ -32,7 +32,7 @@ def generateTone(fs, toneFreq, numSamples, amplitude):
     return wave
 
 if __name__ == '__main__':
-    sig1 = generateTone(sampleRate, 2000, captureTime * sampleRate, 2)
+    sig1 = generateTone(sampleRate, 1000, captureTime * sampleRate, 2)
     sig2 = generateTone(sampleRate, 3000, captureTime * sampleRate, 1)
     sig3 =sig1 #+sig2
 
@@ -45,8 +45,8 @@ noise = .8 * random.rand(captureTime * sampleRate)
 #plt.plot(sig2[:100])
 #plt.show()
 
-plt.plot(sig3[:100])
-plt.show()
+#plt.plot(sig3[:100])
+#plt.show()
 
 fftSig3 = np.fft.fft( sig3[:1024])
 fft_samp_abs = np.abs(fftSig3)
@@ -105,7 +105,7 @@ bpFilter = np.zeros( [1024], dtype=np.complex64)
 
 # NOTE: below, I picked b to give me a 425 tap filter to match what had done before in original overlapadd.py
 fc = 0.2  # Cutoff frequency as a fraction of the sampling rate (in (0, 0.5)).
-b = 0.0094  # Transition band, as a fraction of the sampling rate (in (0, 0.5)).
+b = 0.00945  # Transition band, as a fraction of the sampling rate (in (0, 0.5)).
 N = int(np.ceil((4 / b)))
 if not N % 2: N += 1  # Make sure that N is odd.
 n = np.arange(N)
@@ -125,12 +125,12 @@ h = h / np.sum(h)
 plt.plot(h)
 plt.show()
 h_FFT = np.fft.fft(h,1024)
-plt.semilogy(np.absolute(h_FFT))
-plt.show()
+#plt.semilogy(np.absolute(h_FFT))
+#plt.show()
 
-filteredSig3 = fftSig3 * h_FFT
-plt.plot(filteredSig3)
-plt.show()
+#filteredSig3 = fftSig3 * h_FFT
+#plt.plot(filteredSig3)
+#plt.show()
 
 
 ###############################################################################################################
@@ -147,37 +147,48 @@ filterSize = 425
 chunk = np.zeros( [1024], dtype=np.complex64)
 bpFilter = np.zeros( [1024], dtype=np.complex64)
 
+
+for i in range(0, 425,1):
+    bpFilter[i] = h[i]
+
+bpFilterFFT = np.fft.fft(bpFilter)
+plt.semilogy( np.absolute(bpFilterFFT))
+plt.show()
+
 # make the filter about 60db attenuation
 #  Note:  this filter is pur brick wall - need to improve
 #       by doing a real filter design and/or windowing
 
 
 
-for inc in range(4, 12, 1):   
-    bpFilter[inc] = 1 + 0j
-
-#for inc in range(50, 200, 1):    
+#for inc in range(4, 12, 1):   
 #    bpFilter[inc] = 1 + 0j
 
-bpFilterFFT = np.fft.fft(bpFilter) #/ 1024  #!!!!!!!!!!!!!!!!!!!!!      IS THE /1024 NEEDED??????????????????
+##for inc in range(50, 200, 1):    
+##    bpFilter[inc] = 1 + 0j
+
+#bpFilterFFT = np.fft.fft(bpFilter) #/ 1024  #!!!!!!!!!!!!!!!!!!!!!      IS THE /1024 NEEDED??????????????????
 
 # array to hold the iFFT outputs
 outPut = np.zeros( [captureTime * sampleRate], dtype=np.complex64)
 
 # First, try processing 5 chunks to see how it works
-for i in range(0, 5, 1):
+for i in range(0, 3, 1):
     chunk[:600] = sig3[ i * 600 : (i * 600) + 600]
     chunkFFt = np.fft.fft(chunk) #/ 1024
-    #plt.title("chunk")
-    #plt.plot(np.absolute(chunkFFt))
-    #plt.show()
-    filteredChunk = chunkFFt * bpFilterFFT
-    #plt.title("filtered chunk")
-    #plt.plot(np.absolute(filteredChunk))
-    #plt.show()
+    plt.title("chunk")
+    plt.plot(np.absolute(chunkFFt))
+    plt.show()
+    filteredChunk = chunkFFt * bpFilterFFT # h_FFT
+    plt.title("filtered chunk")
+    plt.plot(np.absolute(filteredChunk))
+    plt.show()
     chunkOut = np.fft.ifft(filteredChunk)
+    plt.title("chunkOut")
+    plt.plot( np.real(chunkOut) )
+    plt.show()
 
-    outPut[i * 600 : (i * 600) +1024] = chunkOut[:1024]
+    outPut[i * 1024 : (i * 1024) + 1024] = chunkOut[:1024]
 
 #plt.plot(np.real(outPut[:5000]))
 #plt.show()
@@ -188,12 +199,12 @@ for i in range(0, 5, 1):
 fig, axs = plt.subplots(2)
 fig.suptitle(" output")
 fig.set_size_inches(15.0,10.0)
-axs[0].plot(np.real(outPut[0:610]))
+axs[0].plot(np.real(outPut[0:2000]))
 axs[0].set_title("Real")
 #axs[0].set_xlabel('frequency [Hz]')
 #axs[0].set_ylabel('Power Spectrum [V RMS]')
 axs[0].grid(color='red', linestyle='--')
-axs[1].plot(np.imag(outPut[0:610]))
+axs[1].plot(np.imag(outPut[0:2000]))
 axs[1].set_title("Imaginary")
 #axs[1].set_xlabel('frequency [Hz]')
 #axs[1].set_ylabel('Power Spectral Density [V**/hz')
