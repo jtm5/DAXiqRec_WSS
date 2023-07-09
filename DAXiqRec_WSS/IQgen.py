@@ -1,3 +1,11 @@
+FROM: https://github.com/jgibbard/iqtool/blob/master/iqgen.py
+
+#Copyright (c) 2017 James Gibbard
+
+#Generates an IQ data file based on provided parameters
+#Tested with python 2.7 and 3.6
+#Requires numpy and matplotlib
+
 import argparse
 from sys import byteorder
 import numpy as np
