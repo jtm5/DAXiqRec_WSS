@@ -33,13 +33,13 @@ def generateTone(fs, toneFreq, numSamples, amplitude):
 
 if __name__ == '__main__':
     sig1 = generateTone(sampleRate, 1000, captureTime * sampleRate, 2)
-    sig2 = generateTone(sampleRate, 3000, captureTime * sampleRate, 1)
+    sig2 = generateTone(sampleRate, 800, captureTime * sampleRate, 1)
     sig3 =sig1 #+sig2
 
 noise = .8 * random.rand(captureTime * sampleRate)
 
 
-#sig3 = sig3 + sig2
+sig3 = sig3 + sig2
 
 #plt.plot(sig1[:100])
 #plt.plot(sig2[:100])
@@ -173,22 +173,25 @@ plt.show()
 outPut = np.zeros( [captureTime * sampleRate], dtype=np.complex64)
 
 # First, try processing 5 chunks to see how it works
-for i in range(0, 3, 1):
+for i in range(0, 5, 1):
     chunk[:600] = sig3[ i * 600 : (i * 600) + 600]
     chunkFFt = np.fft.fft(chunk) #/ 1024
-    plt.title("chunk")
-    plt.plot(np.absolute(chunkFFt))
-    plt.show()
+    #plt.title("chunk")
+    #plt.plot(np.absolute(chunkFFt))
+    #plt.show()
     filteredChunk = chunkFFt * bpFilterFFT # h_FFT
-    plt.title("filtered chunk")
-    plt.plot(np.absolute(filteredChunk))
-    plt.show()
+    #plt.title("filtered chunk")
+    #plt.plot(np.absolute(filteredChunk))
+    #plt.show()
     chunkOut = np.fft.ifft(filteredChunk)
     plt.title("chunkOut")
     plt.plot( np.real(chunkOut) )
     plt.show()
 
-    outPut[i * 1024 : (i * 1024) + 1024] = chunkOut[:1024]
+    if ( i == 0):
+        outPut[i * 1024 : (i * 1024) + 1024] = chunkOut[:1024]
+    else:
+        outPut[i * 600 : (i * 600) + 1024] = outPut[i * 600 : (i * 600) + 1024] + chunkOut[:1024]
 
 #plt.plot(np.real(outPut[:5000]))
 #plt.show()
@@ -199,12 +202,12 @@ for i in range(0, 3, 1):
 fig, axs = plt.subplots(2)
 fig.suptitle(" output")
 fig.set_size_inches(15.0,10.0)
-axs[0].plot(np.real(outPut[0:2000]))
+axs[0].plot(np.real(outPut[0:5000]))
 axs[0].set_title("Real")
 #axs[0].set_xlabel('frequency [Hz]')
 #axs[0].set_ylabel('Power Spectrum [V RMS]')
 axs[0].grid(color='red', linestyle='--')
-axs[1].plot(np.imag(outPut[0:2000]))
+axs[1].plot(np.imag(outPut[0:5000]))
 axs[1].set_title("Imaginary")
 #axs[1].set_xlabel('frequency [Hz]')
 #axs[1].set_ylabel('Power Spectral Density [V**/hz')
