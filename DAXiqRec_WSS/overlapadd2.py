@@ -39,7 +39,7 @@ def generateTone(fs, toneFreq, numSamples, amplitude):
     return wave
 
 if __name__ == '__main__':
-    sig1 = generateTone(sampleRate, 1000, captureTime * sampleRate, 2)
+    sig1 = generateTone(sampleRate, 700, captureTime * sampleRate, 2)
     sig2 = generateTone(sampleRate, 800, captureTime * sampleRate, 1)
     sig3 =sig1 #+sig2
 
