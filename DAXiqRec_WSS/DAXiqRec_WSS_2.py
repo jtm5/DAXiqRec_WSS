@@ -69,18 +69,18 @@ FFTN = segSize + filterSize - 1
 
 # Set up capture parameters
 devs = sd.default.device
-sd.default.device = (46, 17)  # 47 is DAX I/Q 1 and 48??? is DAX 1
+sd.default.device = (47, 17)  # 47 is DAX I/Q 1 and 48??? is DAX 1
 devs = sd.default.device
 
 # Do the recording
 myrecording = sd.rec(int(duration*fs), samplerate=fs, channels=2)
 sd.wait()
 #myrecording = myrecording / math.sqrt(1000)  # if commented out, no scaling
-np.save("Flex.npy", myrecording)
+np.save("D:\\Visual Studio SOURCE\\DSP Experiments\\Flex.npy", myrecording)
 
 
 # OK, assume we have recorded from Flex, input the .NPY file
-#myrecording = np.load("Flex.npy")
+#myrecording = np.load("D:\\Visual Studio SOURCE\\DSP Experiments\\Flex_40m SSB.npy")
 
 #sd.play(myrecording)
 #sd.wait()
@@ -93,8 +93,8 @@ sqrt1000 = math.sqrt(1000.0)
 complexSamps = np.zeros( len(myrecording), dtype=np.complex64)  
 
 for i in range(0, len(myrecording), 1):   
-    complexSamps.real[i] = myrecording[i,0] #* 1000
-    complexSamps.imag[i] = myrecording[i,1] #* 1000
+    complexSamps.real[i] = myrecording[i,0] #* 100
+    complexSamps.imag[i] = myrecording[i,1] #* 100
 
 
 saveFile = "D:\\Visual Studio SOURCE\\DSP Experiments\\complexArray.csv"
@@ -212,12 +212,12 @@ sd.wait()
 fig, axs = plt.subplots(2)
 fig.suptitle(" outReg")
 fig.set_size_inches(15.0,10.0)
-axs[0].plot(outRegister.real[:1000])
+axs[0].plot(outRegister.real[:4000])
 axs[0].set_title("Real")
 #axs[0].set_xlabel('frequency [Hz]')
 #axs[0].set_ylabel('Power Spectrum [V RMS]')
 axs[0].grid(color='red', linestyle='--')
-axs[1].plot(outRegister.imag[:1000])
+axs[1].plot(outRegister.imag[:4000])
 axs[1].set_title("Imaginary")
 #axs[1].set_xlabel('frequency [Hz]')
 #axs[1].set_ylabel('Power Spectral Density [V**/hz')
@@ -225,7 +225,7 @@ axs[1].grid(color='red', linestyle='--')
 plt.show()
 
 
-plt.title("outRegister")
+#plt.title("outRegister")
 #plt.plot(outRegister.real[:5000])
 #plt.show()
 
@@ -259,7 +259,7 @@ plt.xlabel('frequency [Hz]')
 plt.ylabel('Power Spectrum [V RMS]')
 plt.title('Power Spectrum (scipy.signal.welch)')
 plt.grid(color='green', linestyle='--')
-#plt.show()
+plt.show()
 
 
 fig, axs = plt.subplots(2)
@@ -275,7 +275,7 @@ axs[1].set_title("Power SpectralDensity")
 axs[1].set_xlabel('frequency [Hz]')
 axs[1].set_ylabel('Power Spectral Density [V**/hz')
 axs[1].grid(color='red', linestyle='--')
-#plt.show()
+plt.show()
 
 
 # Now create the array of PSDs
@@ -301,16 +301,16 @@ np.save("D:\\Visual Studio SOURCE\\DSP Experiments\\psd_array.npy", psdArray)
 
 # FIRST -- try plotting a couple of PSDs from psdArray[]
 
-#plt.figure()
-##plt.semilogy(f, Pxx_den)
-#pDen=psdArray[200]
-#plt.plot(f, pDen )
-##plt.xlim([0,100])
-#plt.xlabel('frequency [Hz]')
-#plt.ylabel('Power Spectral Density [V**/hz')
-#plt.title('Power Spectral Density (scipy.signal.welch)')
-#plt.grid(color='green', linestyle='--')
-#plt.show()
+plt.figure()
+#plt.semilogy(f, Pxx_den)
+pDen=psdArray[200]
+plt.plot(f, pDen )
+#plt.xlim([0,100])
+plt.xlabel('frequency [Hz]')
+plt.ylabel('Power Spectral Density [V**/hz')
+plt.title('Power Spectral Density (scipy.signal.welch)')
+plt.grid(color='green', linestyle='--')
+plt.show()
 
 
 #OK, try a short animation
@@ -342,9 +342,9 @@ ani = animation.FuncAnimation(
 #
 # or
 #
-# writer = animation.FFMpegWriter(
+#writer = animation.FFMpegWriter(
 #     fps=15, metadata=dict(artist='Me'), bitrate=1800)
-# ani.save("movie.mp4", writer=writer)
+#ani.save("movie.mp4", writer=writer)
 
 
 #plt.show()

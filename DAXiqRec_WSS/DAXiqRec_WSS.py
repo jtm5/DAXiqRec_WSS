@@ -62,14 +62,14 @@ sd.default.device = (47, 17)  # 47 is DAX I/Q 1 and 48??? is DAX 1
 devs = sd.default.device
 
 # Do the recording
-#myrecording = sd.rec(int(duration*fs), samplerate=fs, channels=2)
-#sd.wait()
-##myrecording = myrecording / math.sqrt(1000)  # if commented out, no scaling
-#np.save("Flex.npy", myrecording)
+myrecording = sd.rec(int(duration*fs), samplerate=fs, channels=2)
+sd.wait()
+#myrecording = myrecording / math.sqrt(1000)  # if commented out, no scaling
+np.save("Flex.npy", myrecording)
 
 
 # OK, assume we have recorded from Flex, input the .NPY file
-myrecording = np.load("Flex.npy")
+#myrecording = np.load("Flex.npy")
 
 #sd.play(myrecording)
 #sd.wait()

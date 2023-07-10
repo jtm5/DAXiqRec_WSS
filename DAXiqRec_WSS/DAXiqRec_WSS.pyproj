@@ -27,6 +27,7 @@
     <Compile Include="IQgen.py" />
     <Compile Include="overlapadd.py" />
     <Compile Include="overlapadd2.py" />
+    <Compile Include="scipy_bpfilter.py" />
     <Compile Include="window_sinc.py" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />
