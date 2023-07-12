@@ -24,7 +24,7 @@ FFTN = segSize + filterSize - 1
 numtaps = 425
 
 f1, f2 = 0.020833, 0.0625
-result = signal.firwin(numtaps, [f1, f2], pass_zero=False)
+result = signal.firwin(numtaps, [f1, f2], width = 0.041, window='blackman',pass_zero=False) #, fs=48000)
 
 plt.plot(result)
 plt.show()

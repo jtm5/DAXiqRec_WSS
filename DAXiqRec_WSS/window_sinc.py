@@ -31,20 +31,38 @@ h_FFT = np.fft.fft(h,1024)
 plt.semilogy(np.absolute(h_FFT))
 plt.show()
 
-fig, axs = plt.subplots(2)
-fig.suptitle(" h_FFT")
-fig.set_size_inches(15.0,10.0)
-axs[0].plot(np.real(h_FFT))
-axs[0].set_title("Real")
-#axs[0].set_xlabel('frequency [Hz]')
-#axs[0].set_ylabel('Power Spectrum [V RMS]')
-axs[0].grid(color='red', linestyle='--')
-axs[1].plot(np.imag(h_FFT))
-axs[1].set_title("Imaginary")
-#axs[1].set_xlabel('frequency [Hz]')
-#axs[1].set_ylabel('Power Spectral Density [V**/hz')
-axs[1].grid(color='red', linestyle='--')
+#fig, axs = plt.subplots(2)
+#fig.suptitle(" h_FFT")
+#fig.set_size_inches(15.0,10.0)
+#axs[0].plot(np.real(h_FFT))
+#axs[0].set_title("Real")
+##axs[0].set_xlabel('frequency [Hz]')
+##axs[0].set_ylabel('Power Spectrum [V RMS]')
+#axs[0].grid(color='red', linestyle='--')
+#axs[1].plot(np.imag(h_FFT))
+#axs[1].set_title("Imaginary")
+##axs[1].set_xlabel('frequency [Hz]')
+##axs[1].set_ylabel('Power Spectral Density [V**/hz')
+#axs[1].grid(color='red', linestyle='--')
+#plt.show()
+
+##############################################################
+#  OK, try to do create a HP filter with spectral reversal method
+
+h_hp = -h
+h_hp[213] = h_hp[213] +1
+
+plt.plot(h_hp)
+plt.title("hp time domain")
 plt.show()
+
+
+h_hp_FFT = np.fft.fft(h_hp,1024)
+plt.semilogy(np.absolute(h_hp_FFT))
+plt.show()
+
+
+
 
 
 
